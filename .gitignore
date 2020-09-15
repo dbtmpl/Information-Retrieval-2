@@ -1,3 +1,6 @@
 data/documents/webclue_docs/
+data/clueweb_stats/
+data/topic_indexes/
 data/qulac/qulac_hist012_dict.json
 .idea/
+**/__pycache__/

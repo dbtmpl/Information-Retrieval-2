@@ -1,3 +1,5 @@
+# TODO: put in configs etc ...
+
 data_root = 'data/'
 data_mturk_root = data_root + 'mturk/'
 data_web_track_path = data_root + 'web_track/'

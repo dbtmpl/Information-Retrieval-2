@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 import re
 import nltk
-from utils.utils import *
+from utils.qulac_utils import *
 import time
-from ql_score import ql_score
+from qulac_cython import ql_score
 import pickle
 
 
@@ -189,3 +189,20 @@ class QL:
         #                 print('This terms returns zero document frequency: ', t)
 
         return score
+
+
+def test_model():
+    # Code from jupyter notebook
+    print("Before init...")
+    ql = QL(do_stemming=True,
+            do_stopword_removal=True,
+            data_root='data/')
+    print("Init done.")
+
+    ql.load_topic_index(1)
+    ql.alpha = 0.5
+    ql.update_query_lang_model(query='obama',
+                               question='family tree mother',
+                               answer='yes it is')
+    results_df = ql.get_result_df(topk=1000, query_id='1-1-1')
+    print(results_df)
