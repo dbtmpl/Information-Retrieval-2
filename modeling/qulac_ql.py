@@ -196,7 +196,7 @@ def test_model():
     print("Before init...")
     ql = QL(do_stemming=True,
             do_stopword_removal=True,
-            data_root='data/')
+            data_root='../data/')
     print("Init done.")
 
     ql.load_topic_index(1)
