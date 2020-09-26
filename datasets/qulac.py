@@ -88,45 +88,24 @@ class QulacDataset(datasets.IndexBackedDataset):
             if qid not in result:
                 result[str(qid)] = query_text
 
-        print(result)
         return result
 
     @memoize_method
-    def _load_queries_QQA(self, subset):
-        result = {}
-
-        qulac = load_json(os.path.join(self.qulac_base, 'qulac.json'))
-        query_ids = qulac['topic_id']
-        queries = qulac['topic']
-
-        # TODO: Integrate Q_0, Q and A here in a sane manner. Depends on remaining architecture.
-        for i in range(len(query_ids)):
-            qid = query_ids[i]
-            query_text = queries[i]
-            if qid not in result:
-                result[qid] = query_text
-
-        return result
+    def _load_queries_qqa(self, subset):
+        """
+        Should be similar to _load_queries_base but with integrating Q_0, Q and A.
+        I guess we need to write a new 'pair_iter' function for this and adapt the Trainer.
+        """
+        pass
 
     @memoize_method
     def _load_queries_multi_turn(self, subset):
-        result = {}
-        f = os.path.join(self.qulac_base, f'{subset}.queries.txt')
-        for qid, text in plaintext.read_tsv(f):
-            result[qid] = text
-        return result
-
-    def _load_qulac_data(self):
-        # TODO split qulac in train and test
-        with open(os.path.join(self.qulac_base, 'qulac.json')) as f:
-            qulac = json.load(f)
-        return qulac
+        pass
 
 
 def create_dummy_qrel_file():
     """
-    TODO: Looks like we have to parse 'qulac.json' and 'qulac_hist012_dict.json' to qrel format.
-          => https://trec.nist.gov/data/qrels_eng/
+    Ugly but simple way to create a dummy qrel file.
     """
     doc_base = "../data/documents/webclue_docs"
     i = 1
@@ -141,10 +120,6 @@ def create_dummy_qrel_file():
         for i in range(len(doc_ids)):
             line = f"{qid[i]}  0  {doc_ids[str(i)]}  {rels[rel_inds[i]]}"
             f1.write(line + "\n")
-
-
-def create_queries_files():
-    pass
 
 
 if __name__ == "__main__":
