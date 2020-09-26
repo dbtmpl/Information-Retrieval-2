@@ -2,6 +2,8 @@ import os
 import json
 from pytools import memoize_method
 
+import numpy as np
+
 from onir import datasets, util, indices
 from onir.interfaces import trec, plaintext
 
@@ -48,7 +50,8 @@ class QulacDataset(datasets.IndexBackedDataset):
     def _init_iter_collection(self):
         # Load first 1 doc as a test
         for i in range(1):
-            doc_i = load_json(os.path.join(self.doc_base, f'{i+1}.json'))
+            self.logger.info(f'loading {i + 1}.json ...')
+            doc_i = load_json(os.path.join(self.doc_base, f'{i + 1}.json'))
             doc_ids = doc_i['id']
             doc_texts = doc_i['text']
 
@@ -83,8 +86,9 @@ class QulacDataset(datasets.IndexBackedDataset):
             qid = query_ids[str(i)]
             query_text = queries[str(i)]
             if qid not in result:
-                result[qid] = query_text
+                result[str(qid)] = query_text
 
+        print(result)
         return result
 
     @memoize_method
@@ -119,13 +123,29 @@ class QulacDataset(datasets.IndexBackedDataset):
         return qulac
 
 
-def create_qrel_file():
+def create_dummy_qrel_file():
     """
     TODO: Looks like we have to parse 'qulac.json' and 'qulac_hist012_dict.json' to qrel format.
           => https://trec.nist.gov/data/qrels_eng/
     """
-    pass
+    doc_base = "../data/documents/webclue_docs"
+    i = 1
+    doc_i = load_json(os.path.join(doc_base, f'{i}.json'))
+    doc_ids = doc_i['id']
+    num_docs = len(doc_ids)
+    qid = np.random.randint(200, size=num_docs)
+    rels = [-2, 0, 1, 2, 3, 4]
+    rel_inds = np.random.choice(len(rels), num_docs)
+
+    with open('../data/qulac/output.txt', 'a') as f1:
+        for i in range(len(doc_ids)):
+            line = f"{qid[i]}  0  {doc_ids[str(i)]}  {rels[rel_inds[i]]}"
+            f1.write(line + "\n")
 
 
 def create_queries_files():
     pass
+
+
+if __name__ == "__main__":
+    create_dummy_qrel_file()
