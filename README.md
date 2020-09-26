@@ -7,7 +7,7 @@ IR2/
  - OpenNIR
  - src (this repo)
 ```
-To use OpenNIR as a library: clone it in `IR2`, `` and 
+To use OpenNIR as a library:
 ```
 git clone https://github.com/Georgetown-IR-Lab/OpenNIR.git
 cd OpenNIR
@@ -17,7 +17,5 @@ Because of some hard coded paths we need to run our stuff from the OpenNIR folde
 ```
 python ../src/start.py config/conv_knrm config/antique
 ```
-
 The idea is that we can put all of our code in `src` (this repo) and just extend existing OpenNIR classes, but this maybe not
 possible due to its design. In the worst case we need to put our code directly into `OpenNIR/`. 
-

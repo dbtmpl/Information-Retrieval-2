@@ -10,6 +10,8 @@ import numpy as np
 
 import onir
 
+import datasets, engine, modeling, utils
+
 
 def main():
     context = onir.injector.load({
@@ -23,6 +25,8 @@ def main():
         'test_pred': onir.predictors,
         'pipeline': onir.pipelines,
     }, pretty=True)
+
+    print(context)
 
     context['pipeline'].run()
 
