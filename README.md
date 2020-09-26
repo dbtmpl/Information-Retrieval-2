@@ -19,9 +19,8 @@ git clone https://github.com/Georgetown-IR-Lab/OpenNIR.git
 cd OpenNIR
 pip install -e .
 ```
-Because of some hard coded paths we need to run our stuff from the OpenNIR folder
+Because of some hard coded paths we need to run our stuff from the OpenNIR folder. Like this:
 ``` 
 python ../src/start.py config/conv_knrm ../src/config/qulac
 ```
-The idea is that we can put all of our code in `src` (this repo) and just extend existing OpenNIR classes, but this maybe not
-possible due to its design. In the worst case we need to put our code directly into `OpenNIR/`. 
+By using the OpenNIR`util.Registry` we can put our code (new Dataset, Trainer, Ranker, etc.) in our `src` (see qulac.py as example).
