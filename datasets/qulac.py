@@ -5,6 +5,8 @@ from pytools import memoize_method
 from onir import datasets, util, indices
 from onir.interfaces import trec, plaintext
 
+from utils.data_utils import load_json
+
 
 @datasets.register('qulac')
 class QulacDataset(datasets.IndexBackedDataset):
@@ -12,25 +14,53 @@ class QulacDataset(datasets.IndexBackedDataset):
     Interface to the Qulac dataset.
     Introduced by Aliannejadi et. al. Asking Clarifying Questions in Open-Domain Information-Seeking Conversations
     """
+    DUA = """
+        At this point permission for downloading the dataset is asked. Does Not apply in our case. Answer 'yes'. 
+        """
 
     def __init__(self, config, logger, vocab):
         super().__init__(config, logger, vocab)
-        base_path = "../src/data/qulac"
-        self.base_path = "../src/data/qulac"
-        self.index = indices.AnseriniIndex(os.path.join(base_path, 'anserini'), stemmer='none')
-        self.index_stem = indices.AnseriniIndex(os.path.join(base_path, 'anserini.porter'), stemmer='porter')
-        self.doc_store = indices.SqliteDocstore(os.path.join(base_path, 'docs.sqlite'))
+        self.qulac_base = "../src/data/qulac"
+        self.doc_base = "../src/data/documents/webclue_docs"
+        self.index = indices.AnseriniIndex(os.path.join(self.qulac_base, 'anserini'), stemmer='none')
+        self.index_stem = indices.AnseriniIndex(os.path.join(self.qulac_base, 'anserini.porter'), stemmer='porter')
+        self.doc_store = indices.SqliteDocstore(os.path.join(self.qulac_base, 'docs.sqlite'))
+
+    @staticmethod
+    def default_config():
+        result = datasets.IndexBackedDataset.default_config()
+        result.update({
+            'subset': 'train'
+        })
+        return result
 
     def init(self, force=False):
-        pass
+        """
+        No need to download data. Thus only indexing is happening.
+        """
+
+        idxs = [self.index, self.index_stem, self.doc_store]
+        self._init_indices_parallel(idxs, self._init_iter_collection(), force)
 
     def qrels(self, fmt='dict'):
         return self._load_qrels(self.config['subset'], fmt)
 
+    def _init_iter_collection(self):
+        # Load first 1 doc as a test
+        for i in range(1):
+            doc_i = load_json(os.path.join(self.doc_base, f'{i+1}.json'))
+            doc_ids = doc_i['id']
+            doc_texts = doc_i['text']
+
+            for j in range(len(doc_ids)):
+                did = doc_ids[str(j)]
+                doc_text = doc_texts[str(j)]
+                yield indices.RawDoc(did, doc_text)
+
     @memoize_method
     def _load_qrels(self, subset, fmt):
         # TODO: change dummy to real file after parsing is implemented
-        return trec.read_qrels_fmt(os.path.join(self.base_path, f'{subset}.qrels.dummy.txt'), fmt)
+        return trec.read_qrels_fmt(os.path.join(self.qulac_base, f'{subset}.qrels.txt'), fmt)
 
     def _get_index(self, record):
         return self.index
@@ -45,7 +75,7 @@ class QulacDataset(datasets.IndexBackedDataset):
     def _load_queries_base(self, subset):
         result = {}
 
-        qulac = self._load_qulac_data()
+        qulac = load_json(os.path.join(self.qulac_base, 'qulac.json'))
         query_ids = qulac['topic_id']
         queries = qulac['topic']
 
@@ -61,7 +91,7 @@ class QulacDataset(datasets.IndexBackedDataset):
     def _load_queries_QQA(self, subset):
         result = {}
 
-        qulac = self._load_qulac_data()
+        qulac = load_json(os.path.join(self.qulac_base, 'qulac.json'))
         query_ids = qulac['topic_id']
         queries = qulac['topic']
 
@@ -77,14 +107,14 @@ class QulacDataset(datasets.IndexBackedDataset):
     @memoize_method
     def _load_queries_multi_turn(self, subset):
         result = {}
-        f = os.path.join(self.base_path, f'{subset}.queries.txt')
+        f = os.path.join(self.qulac_base, f'{subset}.queries.txt')
         for qid, text in plaintext.read_tsv(f):
             result[qid] = text
         return result
 
     def _load_qulac_data(self):
         # TODO split qulac in train and test
-        with open(os.path.join(self.base_path, 'qulac.json')) as f:
+        with open(os.path.join(self.qulac_base, 'qulac.json')) as f:
             qulac = json.load(f)
         return qulac
 

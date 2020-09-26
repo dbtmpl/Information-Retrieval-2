@@ -4,3 +4,7 @@ data/topic_indexes/
 data/qulac/qulac_hist012_dict.json
 .idea/
 **/__pycache__/
+**/anserini/
+**/anserini.porter/
+**/anserini.porter.train.runs/
+**/docs.sqlite
