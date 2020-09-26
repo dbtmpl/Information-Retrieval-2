@@ -24,8 +24,6 @@ def main():
         'pipeline': onir.pipelines,
     }, pretty=True)
 
-    print(context)
-
     context['pipeline'].run()
 
 
