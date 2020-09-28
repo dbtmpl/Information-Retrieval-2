@@ -116,7 +116,7 @@ def create_dummy_qrel_file():
     rels = [-2, 0, 1, 2, 3, 4]
     rel_inds = np.random.choice(len(rels), num_docs)
 
-    with open('../data/qulac/output.txt', 'a') as f1:
+    with open('../data/qulac/train.qrels.txt', 'a') as f1:
         for i in range(len(doc_ids)):
             line = f"{qid[i]}  0  {doc_ids[str(i)]}  {rels[rel_inds[i]]}"
             f1.write(line + "\n")
