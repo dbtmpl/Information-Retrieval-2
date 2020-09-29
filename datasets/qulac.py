@@ -91,14 +91,6 @@ class QulacDataset(datasets.IndexBackedDataset):
         return result
 
     @memoize_method
-    def _load_queries_qqa(self, subset):
-        """
-        Should be similar to _load_queries_base but with integrating Q_0, Q and A.
-        I guess we need to write a new 'pair_iter' function for this and adapt the Trainer.
-        """
-        pass
-
-    @memoize_method
     def _load_queries_multi_turn(self, subset):
         pass
 
