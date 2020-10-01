@@ -1,5 +1,0 @@
-train_ds=qulac_qqa
-train_ds.subset=train
-train_ds.ranktopk=100
-train_ds.rankfn=bm25_k1-1.4_b-0.40
-trainer.pos_minrel=3

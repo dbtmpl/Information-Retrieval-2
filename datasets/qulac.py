@@ -1,11 +1,10 @@
 import os
-import json
+
 from pytools import memoize_method
 
-import numpy as np
-
-from onir import datasets, util, indices
-from onir.interfaces import trec, plaintext
+from onir import datasets, indices
+from onir.interfaces import trec
+from onir.datasets.index_backed import LazyDataRecord
 
 from utils.data_utils import load_json
 
@@ -44,16 +43,23 @@ class QulacDataset(datasets.IndexBackedDataset):
         idxs = [self.index, self.index_stem, self.doc_store]
         self._init_indices_parallel(idxs, self._init_iter_collection(), force)
 
+    def build_record(self, fields, **initial_values):
+        record = LazyDataRecordQulac(self, **initial_values)
+        record.load(fields)
+        return record
+
     def qrels(self, fmt='dict'):
         return self._load_qrels(self.config['subset'], fmt)
 
     def _init_iter_collection(self):
-        # Load first 1 doc as a test
-        for i in range(1):
-            self.logger.info(f'loading {i + 1}.json ...')
-            doc_i = load_json(os.path.join(self.doc_base, f'{i + 1}.json'))
-            doc_ids = doc_i['id']
-            doc_texts = doc_i['text']
+
+        doc_names = os.listdir("../src/data/documents/webclue_docs")
+
+        for i, doc_name in enumerate(doc_names):
+            self.logger.info(f'loading {doc_name} ... [{i} / {len(doc_names)}]')
+            docs_i = load_json(os.path.join(self.doc_base, doc_name))
+            doc_ids = docs_i['id']
+            doc_texts = docs_i['text']
 
             for j in range(len(doc_ids)):
                 did = doc_ids[str(j)]
@@ -62,7 +68,6 @@ class QulacDataset(datasets.IndexBackedDataset):
 
     @memoize_method
     def _load_qrels(self, subset, fmt):
-        # TODO: change dummy to real file after parsing is implemented
         return trec.read_qrels_fmt(os.path.join(self.qulac_base, f'{subset}.qrels.txt'), fmt)
 
     def _get_index(self, record):
@@ -74,45 +79,120 @@ class QulacDataset(datasets.IndexBackedDataset):
     def _get_index_for_batchsearch(self):
         return self.index_stem
 
+    def _question_rawtext(self, record):
+        return self._load_questions_base(self.config['subset'])[record['query_id']]
+
+    def _question_text(self, record):
+        return tuple(self.vocab.tokenize(record['question_rawtext']))
+
+    def _question_tok(self, record):
+        return [self.vocab.tok2id(t) for t in record['question_text']]
+
+    def _question_idf(self, record):
+        index = self._get_index(record)
+        return [index.term2idf(t) for t in record['question_text']]
+
+    def _question_len(self, record):
+        return len(record['question_text'])
+
+    def _answer_rawtext(self, record):
+        return self._load_answers_base(self.config['subset'])[record['query_id']]
+
+    def _answer_text(self, record):
+        return tuple(self.vocab.tokenize(record['answer_rawtext']))
+
+    def _answer_tok(self, record):
+        return [self.vocab.tok2id(t) for t in record['answer_text']]
+
+    def _answer_idf(self, record):
+        index = self._get_index(record)
+        return [index.term2idf(t) for t in record['answer_text']]
+
+    def _answer_len(self, record):
+        return len(record['answer_text'])
+
     @memoize_method
     def _load_queries_base(self, subset):
         result = {}
 
         qulac = load_json(os.path.join(self.qulac_base, 'qulac.json'))
-        query_ids = qulac['topic_id']
+        query_ids = qulac['topic_facet_question_id']
         queries = qulac['topic']
 
         for i in range(len(query_ids)):
             qid = query_ids[str(i)]
-            query_text = queries[str(i)]
+            query_text = queries[str(i)].strip()
             if qid not in result:
                 result[str(qid)] = query_text
 
         return result
 
     @memoize_method
-    def _load_queries_multi_turn(self, subset):
-        pass
+    def _load_questions_base(self, subset):
+        result = {}
+
+        qulac = load_json(os.path.join(self.qulac_base, 'qulac.json'))
+        query_ids = qulac['topic_facet_question_id']
+        questions = qulac['question']
+
+        for i in range(len(query_ids)):
+            qid = query_ids[str(i)]
+            question = questions[str(i)].strip()
+            if qid not in result:
+                result[str(qid)] = question
+
+        return result
+
+    @memoize_method
+    def _load_answers_base(self, subset):
+        result = {}
+
+        qulac = load_json(os.path.join(self.qulac_base, 'qulac.json'))
+        query_ids = qulac['topic_facet_question_id']
+        answers = qulac['answer']
+
+        for i in range(len(query_ids)):
+            qid = query_ids[str(i)]
+            answer = answers[str(i)].strip()
+            if qid not in result:
+                result[str(qid)] = answer
+
+        return result
 
 
-def create_dummy_qrel_file():
-    """
-    Ugly but simple way to create a dummy qrel file.
-    """
-    doc_base = "../data/documents/webclue_docs"
-    i = 1
-    doc_i = load_json(os.path.join(doc_base, f'{i}.json'))
-    doc_ids = doc_i['id']
-    num_docs = len(doc_ids)
-    qid = np.random.randint(200, size=num_docs)
-    rels = [-2, 0, 1, 2, 3, 4]
-    rel_inds = np.random.choice(len(rels), num_docs)
-
-    with open('../data/qulac/train.qrels.txt', 'a') as f1:
-        for i in range(len(doc_ids)):
-            line = f"{qid[i]}  0  {doc_ids[str(i)]}  {rels[rel_inds[i]]}"
-            f1.write(line + "\n")
-
-
-if __name__ == "__main__":
-    create_dummy_qrel_file()
+class LazyDataRecordQulac(LazyDataRecord):
+    def __init__(self, ds, **data):
+        # pylint: disable=W0212
+        super().__init__(ds, **data)
+        self.ds = ds
+        self._data = data
+        self.methods = {
+            'answer_rawtext': ds._answer_rawtext,
+            'answer_text': ds._answer_text,
+            'answer_tok': ds._answer_tok,
+            'answer_idf': ds._answer_idf,
+            'answer_len': ds._answer_len,
+            'question_rawtext': ds._question_rawtext,
+            'question_text': ds._question_text,
+            'question_tok': ds._question_tok,
+            'question_idf': ds._question_idf,
+            'question_len': ds._question_len,
+            'query_rawtext': ds._query_rawtext,
+            'query_text': ds._query_text,
+            'query_tok': ds._query_tok,
+            'query_idf': ds._query_idf,
+            'query_len': ds._query_len,
+            'query_lang': ds._query_lang,
+            'query_score': ds._query_score,
+            'doc_rawtext': ds._doc_rawtext,
+            'doc_text': ds._doc_text,
+            'doc_tok': ds._doc_tok,
+            'doc_idf': ds._doc_idf,
+            'doc_len': ds._doc_len,
+            'doc_lang': ds._doc_lang,
+            'runscore': ds._runscore,
+            'relscore': ds._relscore,
+            'kdescore': ds._kdescore,
+            'normscore': ds._normscore,
+            'rank': ds._rank,
+        }

@@ -7,4 +7,7 @@ data/qulac/qulac_hist012_dict.json
 **/anserini/
 **/anserini.porter/
 **/anserini.porter.train.runs/
+**/anserini.porter.valid.runs/
 **/docs.sqlite
+**/faceted_qid.qrel
+**/qids_splits_topic.pkl
