@@ -12,6 +12,22 @@ from onir.vocab import WordvecVocab, WordvecHashVocab
 @vocab.register('wordvec_hash_qqa')
 class WordvecHashVocabQQA(WordvecHashVocab):
 
+    def __init__(self, config, logger, random):
+        super().__init__(config, logger, random)
+        print(config)
+        self.enc_aggregation = config['encoder.aggregation']
+
+    @staticmethod
+    def default_config():
+        result = WordvecVocab.default_config().copy()
+        result.update({
+            'hashspace': 1000,
+            'init_stddev': 0.5,
+            'log_miss': False,
+            'encoder.aggregation': 'mean'
+        })
+        return result
+
     def encoder(self):
         return WordvecEncoderQQA(self)
 
@@ -27,6 +43,7 @@ class WordvecEncoderQQA(vocab.VocabEncoder):
             torch.from_numpy(matrix.astype(np.float32)),
             freeze=not vocabulary.config['train']
         )
+        self.aggregation_func = get_aggregation_func(vocabulary.enc_aggregation)
 
     def forward(self, toks, lens=None):
 
@@ -41,10 +58,8 @@ class WordvecEncoderQQA(vocab.VocabEncoder):
             query_embed = self.embed(query_toks + 1)
             question_embed = self.embed(question_toks + 1)
             answer_embed = self.embed(answer_toks + 1)
-            stacked_embed = torch.stack((query_embed, question_embed, answer_embed), dim=2)
 
-            return torch.mean(stacked_embed, dim=2)
-
+            return self.aggregation_func(query_embed, question_embed, answer_embed)
 
     def _enc_spec(self) -> dict:
         return {
@@ -66,3 +81,25 @@ class WordvecEncoderQQA(vocab.VocabEncoder):
             'query': self((inputs['query_tok'], inputs['question_tok'], inputs['answer_tok']), inputs['query_len']),
             'doc': self((inputs['doc_tok'],), inputs['doc_len'])
         }
+
+
+def mean_aggregation(query_embed, question_embed, answer_embed):
+    stacked_embed = torch.stack((query_embed, question_embed, answer_embed), dim=2)
+    return torch.mean(stacked_embed, dim=2)
+
+
+def concat_aggregation(query_embed, question_embed, answer_embed):
+    return torch.cat((query_embed, question_embed, answer_embed), dim=2)
+
+
+def weighted_aggregation(query_embed, question_embed, answer_embed):
+    return (2 / 3) * query_embed + (1 / 6) * question_embed + (1 / 6) * answer_embed
+
+
+def get_aggregation_func(key):
+    aggregations = {
+        'mean': mean_aggregation,
+        'concat': concat_aggregation,
+        'weighted': weighted_aggregation,
+    }
+    return aggregations[key]

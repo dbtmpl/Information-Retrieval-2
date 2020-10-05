@@ -1,12 +1,33 @@
-from onir import util, rankers, predictors, datasets
+import torch
+from torch import nn
+
+from onir import util, rankers, predictors, datasets, modules
 from onir.predictors import Reranker
 from onir.rankers.conv_knrm import ConvKnrm
+
+from onir.vocab import wordvec_vocab
 
 from utils.general_utils import apply_spec_batch_qqa
 
 
 @rankers.register('conv_knrm_qqa')
 class ConvKnrmQQA(ConvKnrm):
+
+    @staticmethod
+    def default_config():
+        result = rankers.Ranker.default_config()
+        result.update({
+            'mus': '-0.9,-0.7,-0.5,-0.3,-0.1,0.1,0.3,0.5,0.7,0.9,1.0',
+            'sigmas': '0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.001',
+            'grad_kernels': True,
+            'max_ngram': 3,
+            'crossmatch': True,
+            'conv_filters': 128,
+            'embed_dim': 300,
+            'combine_channels': False,
+            'pretrained_kernels': False,
+        })
+        return result
 
     def input_spec(self):
         result = super().input_spec()
@@ -15,7 +36,6 @@ class ConvKnrmQQA(ConvKnrm):
             'question_tok', 'answer_tok', 'question_len', 'answer_len',
         })
         return result
-
 
 
 @predictors.register('reranker_qqa')
