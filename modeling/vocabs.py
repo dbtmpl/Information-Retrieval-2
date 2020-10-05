@@ -15,7 +15,7 @@ class WordvecHashVocabQQA(WordvecHashVocab):
     def __init__(self, config, logger, random):
         super().__init__(config, logger, random)
         print(config)
-        self.enc_aggregation = config['encoder.aggregation']
+        self.enc_aggregation = config['aggregation']
 
     @staticmethod
     def default_config():
@@ -24,7 +24,7 @@ class WordvecHashVocabQQA(WordvecHashVocab):
             'hashspace': 1000,
             'init_stddev': 0.5,
             'log_miss': False,
-            'encoder.aggregation': 'mean'
+            'aggregation': 'mean'
         })
         return result
 

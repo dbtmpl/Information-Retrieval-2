@@ -50,3 +50,40 @@ To start the job run
 ```
 sbatch run.sh
 ```
+
+### Adding and using configs
+First add new config to config file e.g. for new aggregation
+General pattern:
+```
+<class_key>.<config_name>=<value>
+Possible <class_key> are {'vocab', 'train_ds', 'ranker', 'trainer', 'valid_ds', 'valid_pred', 'test_ds', 'test_pred', 'pipeline'} (see keys in context dict in start.py)
+```
+Example:
+```
+vocab=wordvec_hash_qqa
+vocab.aggregation=weighted
+```
+Now the config name needs needs a default. So it needs to be set in the `default_config()` function. In the vocab:
+```
+# The vocab you use e.g. WordvecHashVocabQQA ...
+@staticmethod
+def default_config():
+    result = WordvecVocab.default_config().copy()
+    result.update({
+        'hashspace': 1000,
+        'init_stddev': 0.5,
+        'log_miss': False,
+        'aggregation': 'mean' <== Add new
+    })
+    return result
+``` 
+Now config will be part of the config dict in the `__ini__` of the respective class and can be used:
+```
+def __init__(self, config, logger, random):
+    super().__init__(config, logger, random)
+    print(config)
+    self.enc_aggregation = config['aggregation']
+
+    # Do something with new config
+```
+If config does not appear most likely the naming of the `<class_key>` (in this case `vocab`) is wrong.
