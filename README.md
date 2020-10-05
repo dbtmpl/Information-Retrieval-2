@@ -52,16 +52,17 @@ sbatch run.sh
 ```
 
 ### Adding and using configs
-First add new config to config file e.g. for new aggregation
-General pattern:
+First add new config to config file e.g. `config/qulac/_dir`. General pattern:
 ```
 <class_key>.<config_name>=<value>
-Possible <class_key> are {'vocab', 'train_ds', 'ranker', 'trainer', 'valid_ds', 'valid_pred', 'test_ds', 'test_pred', 'pipeline'} (see keys in context dict in start.py)
+
+# Possible <class_key> are: 'vocab', 'train_ds', 'ranker', 'trainer', 'valid_ds', 'valid_pred', 'test_ds', 'test_pred', 'pipeline'
+# See keys in context dict in start.py
 ```
-Example:
+Example add embedding aggregation config:
 ```
 vocab=wordvec_hash_qqa
-vocab.aggregation=weighted
+vocab.aggregation=mean
 ```
 Now the config name needs needs a default. So it needs to be set in the `default_config()` function. In the vocab:
 ```
@@ -77,7 +78,7 @@ def default_config():
     })
     return result
 ``` 
-Now config will be part of the config dict in the `__ini__` of the respective class and can be used:
+Now config will be part of the config dict in the `__init__()` of the respective class and can be used:
 ```
 def __init__(self, config, logger, random):
     super().__init__(config, logger, random)
