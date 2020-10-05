@@ -14,7 +14,6 @@ class WordvecHashVocabQQA(WordvecHashVocab):
 
     def __init__(self, config, logger, random):
         super().__init__(config, logger, random)
-        print(config)
         self.enc_aggregation = config['aggregation']
 
     @staticmethod

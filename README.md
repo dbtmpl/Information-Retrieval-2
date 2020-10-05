@@ -80,9 +80,10 @@ def default_config():
 ``` 
 Now config will be part of the config dict in the `__init__()` of the respective class and can be used:
 ```
+# in WordvecHashVocabQQA class...
+
 def __init__(self, config, logger, random):
     super().__init__(config, logger, random)
-    print(config)
     self.enc_aggregation = config['aggregation']
 
     # Do something with new config
