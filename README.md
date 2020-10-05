@@ -32,3 +32,21 @@ git clone https://github.com/Georgetown-IR-Lab/OpenNIR.git
 cd OpenNIR
 pip install -e .
 ```
+### Surfsara
+
+Move the run.sh file into the OpenNIR directory using
+
+```
+mv run.sh ../OpenNIR
+```
+
+the .bashrc file might need to be updated to support java 11, if the script does not run the add the following
+```
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+```
+
+To start the job run
+```
+sbatch run.sh
+```
