@@ -1,12 +1,17 @@
 import re
 import hashlib
+import tempfile
+import os
+import tokenizers as tk
 
 import numpy as np
 import torch
 import torch.nn as nn
+from pytorch_transformers import BertTokenizer
 
-from onir import vocab
-from onir.vocab import WordvecVocab, WordvecHashVocab
+from onir import vocab, config
+from onir.interfaces import bert_models
+from onir.vocab import WordvecVocab, WordvecHashVocab, BertVocab
 
 
 @vocab.register('wordvec_hash_qqa')
@@ -102,3 +107,54 @@ def get_aggregation_func(key):
         'weighted': weighted_aggregation,
     }
     return aggregations[key]
+
+
+
+
+#########
+
+
+@vocab.register('bert_qqa')
+class BertQQAVocab(BertVocab):
+    @staticmethod
+    def default_config():
+        return {
+            'bert_base': 'bert-base-uncased',
+            'bert_weights': '',     # TODO: merge bert_base and bert_weights somehow, better integrate fine-tuning BERT into pipeline
+            'layer': -1, # all layers
+            'last_layer': False,
+            'train': False,
+            'encoding': config.Choices(['joint', 'sep']),
+        }
+
+    def __init__(self, config, logger):
+        super().__init__(config, logger)
+        bert_model = bert_models.get_model(config['bert_base'], self.logger)
+        self.tokenizer = BertTokenizer.from_pretrained(bert_model)
+        # HACK! Until the transformers library adopts tokenizers, save and re-load vocab
+        with tempfile.TemporaryDirectory() as d:
+            self.tokenizer.save_vocabulary(d)
+            # this tokenizer is ~4x faster as the BertTokenizer, per my measurements
+            self.tokenizer = tk.BertWordPieceTokenizer(os.path.join(d, 'vocab.txt'))
+
+    def tokenize(self, text):
+        # return self.tokenizer.tokenize(text)
+        return self.tokenizer.encode(text).tokens[1:-1] # removes leading [CLS] and trailing [SEP]
+
+    def tok2id(self, tok):
+        # return self.tokenizer.vocab[tok]
+        return self.tokenizer.token_to_id(tok)
+
+    def id2tok(self, idx):
+        if torch.is_tensor(idx):
+            if len(idx.shape) == 0:
+                return self.id2tok(idx.item())
+            return [self.id2tok(x) for x in idx]
+        # return self.tokenizer.ids_to_tokens[idx]
+        return self.tokenizer.id_to_token(idx)
+
+    def lexicon_path_segment(self):
+        return 'bert_{bert_base}'.format(**self.config)
+
+    def lexicon_size(self) -> int:
+        return self.tokenizer._tokenizer.get_vocab_size()
