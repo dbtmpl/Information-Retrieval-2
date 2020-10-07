@@ -1,8 +1,10 @@
 import os
+import contextlib
+import functools
 
 from pytools import memoize_method
 
-from onir import datasets, indices
+from onir import datasets, indices, util
 from onir.interfaces import trec
 from onir.datasets.index_backed import LazyDataRecord
 
@@ -42,6 +44,18 @@ class QulacDataset(datasets.IndexBackedDataset):
 
         idxs = [self.index, self.index_stem, self.doc_store]
         self._init_indices_parallel(idxs, self._init_iter_collection(), force)
+
+    def _init_indices_parallel(self, indices, doc_iter, force):
+        needs_docs = []
+        for index in indices:
+            if force or not index.built():
+                needs_docs.append(index)
+
+        if needs_docs:
+            with contextlib.ExitStack() as stack:
+                doc_iters = util.blocking_tee(doc_iter, len(needs_docs))
+                for idx, it in zip(needs_docs, doc_iters):
+                    stack.enter_context(util.CtxtThread(functools.partial(idx.build, it)))
 
     def build_record(self, fields, **initial_values):
         record = LazyDataRecordQulac(self, **initial_values)

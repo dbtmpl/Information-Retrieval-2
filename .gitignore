@@ -1,4 +1,5 @@
 data/documents/webclue_docs/
+data/documents/webclue_docs_full/
 data/clueweb_stats/
 data/topic_indexes/
 data/qulac/qulac_hist012_dict.json
@@ -9,5 +10,6 @@ data/qulac/qulac_hist012_dict.json
 **/anserini.porter.train.runs/
 **/anserini.porter.valid.runs/
 **/docs.sqlite
+**/docs.sqlite.tmp
 **/faceted_qid.qrel
 **/qids_splits_topic.pkl
