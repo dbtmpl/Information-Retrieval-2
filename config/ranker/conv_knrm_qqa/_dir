@@ -1,2 +1,4 @@
 ranker=conv_knrm_qqa
 trainer=pairwise_qqa
+vocab=wordvec_hash_qqa
+vocab.aggregation=weighted

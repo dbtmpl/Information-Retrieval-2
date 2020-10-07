@@ -70,7 +70,7 @@ class QulacDataset(datasets.IndexBackedDataset):
         doc_names = os.listdir("../src/data/documents/webclue_docs")
 
         for i, doc_name in enumerate(doc_names):
-            self.logger.info(f'loading {doc_name} ... [{i} / {len(doc_names)}]')
+            self.logger.info(f'loading {doc_name} ... [{i+1} / {len(doc_names)}]')
             docs_i = load_json(os.path.join(self.doc_base, doc_name))
             doc_ids = docs_i['id']
             doc_texts = docs_i['text']
