@@ -1,0 +1,7 @@
+vocab=bert
+vocab.train=False
+valid_pred.batch_size=16
+test_pred.batch_size=16
+trainer=pairwise_qqa
+trainer.encoder_lr=2e-5
+trainer.grad_acc_batch=2
