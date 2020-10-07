@@ -86,3 +86,11 @@ class CedrKnrm(rankers.knrm.Knrm):
         kernel_scores = self.kernel_pool(simmat)
         all_scores = torch.cat([kernel_scores, rep['cls'][-1]], dim=1)
         return self.combine(all_scores)
+
+    def input_spec(self):
+        result = super().input_spec()
+        result['fields'].update({
+            'query_tok', 'doc_tok', 'query_len', 'doc_len',
+            'question_tok', 'answer_tok', 'question_len', 'answer_len',
+        })
+        return result
