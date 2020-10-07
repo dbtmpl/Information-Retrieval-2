@@ -1,12 +1,6 @@
-import torch
-from torch import nn
-
-from onir import util, rankers, predictors, datasets, modules
+from onir import util, rankers, predictors, datasets
 from onir.predictors import Reranker
 from onir.rankers.conv_knrm import ConvKnrm
-from onir.rankers.cedr_knrm import CedrKnrm
-
-from onir.vocab import wordvec_vocab
 
 from utils.general_utils import apply_spec_batch_qqa
 
@@ -60,37 +54,3 @@ class RerankerQQA(Reranker):
             batch = apply_spec_batch_qqa(batch, self.input_spec, device)
             # ship 'em
             yield batch
-
-
-
-@rankers.register('cedr_knrm_qqa')
-class CedrKnrm(rankers.knrm.Knrm):
-    """
-    Implementation of CEDR for the KNRM model described in:
-      > Sean MacAvaney, Andrew Yates, Arman Cohan, and Nazli Goharian. 2019. CEDR: Contextualized
-      > Embeddings for Document Ranking. In SIGIR.
-    Should be used with a model first trained using Vanilla BERT.
-    TODO: additions made for QQA
-    """
-
-    def __init__(self, vocab, config, logger, random):
-        super().__init__(vocab, config, logger, random)
-        enc = self.encoder
-        assert 'cls' in enc.enc_spec()['joint_fields'], \
-               "CedrKnrm requires a vocabulary that supports CLS encoding, e.g., BertVocab"
-        self.combine = nn.Linear(self.combine.in_features + enc.dim(), self.combine.out_features)
-
-    def _forward(self, **inputs):
-        rep = self.encoder.enc_query_doc(**inputs)
-        simmat = self.simmat(rep['query'], rep['doc'], inputs['query_tok'], inputs['doc_tok'])
-        kernel_scores = self.kernel_pool(simmat)
-        all_scores = torch.cat([kernel_scores, rep['cls'][-1]], dim=1)
-        return self.combine(all_scores)
-
-    def input_spec(self):
-        result = super().input_spec()
-        result['fields'].update({
-            'query_tok', 'doc_tok', 'query_len', 'doc_len',
-            'question_tok', 'answer_tok', 'question_len', 'answer_len',
-        })
-        return result
