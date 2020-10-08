@@ -1,4 +1,3 @@
 ranker=vanilla_transformer_qqa_joint
 vocab.encoding=joint
-../bert_qqa
-
+../../../bert_vocabs/bert_qqa

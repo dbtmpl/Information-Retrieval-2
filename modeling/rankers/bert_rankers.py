@@ -52,5 +52,6 @@ class VanillaTransformerQQASep(VanillaTransformer):
 
     def _doc_qqa_aggregation(self, qqa_cls, doc_cls, dim=1):
         # TODO: Think about clever aggregations. Note we already aggregated QQA.
+        # TODO: Probably here a good point to try out the 1D conv idea.
         stacked_embed = torch.stack((qqa_cls, doc_cls), dim=dim)
         return torch.mean(stacked_embed, dim=dim)
