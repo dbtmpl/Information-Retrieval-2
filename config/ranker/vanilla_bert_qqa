@@ -1,4 +1,4 @@
-ranker=vanilla_transformer_qqa
-vocab.encoding=sep
+ranker=vanilla_transformer_qqa_joint
+vocab.encoding=joint
 ../bert_qqa
 

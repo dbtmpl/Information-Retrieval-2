@@ -1,2 +1,2 @@
 from .rankers import ConvKnrmQQA, RerankerQQA
-from .bert_ranker import VanillaTransformerQQA
+from .bert_rankers import VanillaTransformerQQASep, VanillaTransformerQQAJoint
