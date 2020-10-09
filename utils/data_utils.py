@@ -40,8 +40,8 @@ def save_docs_ids_we_use():
     save_pickle('../data/qulac/used_docs.pkl', used_doc_ids)
 
 
-def keep_top1000_docs_per_topic():
-    doc_names = os.listdir("../data/documents/webclue_docs_full")
+def keep_top1000_docs_per_topic(path_all_docs, path_1000k_docs):
+    doc_names = os.listdir(path_all_docs)
     docs_sorted = load_pickle('../data/qulac/initial_retrieval_dict_10K.pkl')
 
     for i, doc_name in enumerate(doc_names):
@@ -51,7 +51,7 @@ def keep_top1000_docs_per_topic():
             'text': {}
         }
         topic_id = doc_name.split('.')[0]
-        docs_i = load_json(os.path.join("../data/documents/webclue_docs_full", doc_name))
+        docs_i = load_json(os.path.join(path_all_docs, doc_name))
         keep_doc_ids_i = docs_sorted[int(topic_id)]
 
         for j, doc_id_sorted in enumerate(keep_doc_ids_i[:1000]):
@@ -61,7 +61,7 @@ def keep_top1000_docs_per_topic():
                     top_1000_docs['id'][j] = doc_id_sorted
                     top_1000_docs['text'][j] = docs_i['text'][idx]
 
-        save_json(f"../data/documents/webclue_docs_1000/{topic_id}.json", top_1000_docs)
+        save_json(os.path.join(path_1000k_docs, f"{topic_id}.json"), top_1000_docs)
 
 
 def split_data():
@@ -127,6 +127,6 @@ def create_dummy_qrel_file():
 
 
 if __name__ == "__main__":
-    # keep_top1000_docs_per_topic()
+    keep_top1000_docs_per_topic("../data/documents/webclue_docs_full", "../data/documents/webclue_docs_1000/")
     # save_docs_ids_we_use()
-    split_data()
+    # split_data()
