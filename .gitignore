@@ -1,5 +1,6 @@
 data/documents/webclue_docs/
 data/documents/webclue_docs_full/
+data/documents/webclue_docs_1000/
 data/clueweb_stats/
 data/topic_indexes/
 data/qulac/qulac_hist012_dict.json
@@ -13,3 +14,5 @@ data/qulac/qulac_hist012_dict.json
 **/docs.sqlite.tmp
 **/faceted_qid.qrel
 **/qids_splits_topic.pkl
+**/initial_retrieval_dict_10K.pkl
+**/used_docs.pkl

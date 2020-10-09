@@ -8,7 +8,7 @@ from onir import datasets, indices, util
 from onir.interfaces import trec
 from onir.datasets.index_backed import LazyDataRecord
 
-from utils.data_utils import load_json
+from utils.data_utils import load_json, load_pickle
 
 
 @datasets.register('qulac')
@@ -24,7 +24,7 @@ class QulacDataset(datasets.IndexBackedDataset):
     def __init__(self, config, logger, vocab):
         super().__init__(config, logger, vocab)
         self.qulac_base = "../src/data/qulac"
-        self.doc_base = "../src/data/documents/webclue_docs"
+        self.doc_base = "../src/data/documents/webclue_docs_1000"
         self.index = indices.AnseriniIndex(os.path.join(self.qulac_base, 'anserini'), stemmer='none')
         self.index_stem = indices.AnseriniIndex(os.path.join(self.qulac_base, 'anserini.porter'), stemmer='porter')
         self.doc_store = indices.SqliteDocstore(os.path.join(self.qulac_base, 'docs.sqlite'))
@@ -66,11 +66,10 @@ class QulacDataset(datasets.IndexBackedDataset):
         return self._load_qrels(self.config['subset'], fmt)
 
     def _init_iter_collection(self):
-
-        doc_names = os.listdir("../src/data/documents/webclue_docs")
+        doc_names = os.listdir(self.doc_base)
 
         for i, doc_name in enumerate(doc_names):
-            self.logger.info(f'loading {doc_name} ... [{i+1} / {len(doc_names)}]')
+            self.logger.info(f'loading {doc_name} ... [{i + 1} / {len(doc_names)}]')
             docs_i = load_json(os.path.join(self.doc_base, doc_name))
             doc_ids = docs_i['id']
             doc_texts = docs_i['text']
@@ -129,15 +128,19 @@ class QulacDataset(datasets.IndexBackedDataset):
     def _load_queries_base(self, subset):
         result = {}
 
+        _splits = load_pickle(os.path.join(self.qulac_base, 'final_splits.pkl'))
+        _split = [subset]
+
         qulac = load_json(os.path.join(self.qulac_base, 'qulac.json'))
         query_ids = qulac['topic_facet_question_id']
         queries = qulac['topic']
 
         for i in range(len(query_ids)):
             qid = query_ids[str(i)]
+            # if qid not in _split:
+            #     continue
             query_text = queries[str(i)].strip()
-            if qid not in result:
-                result[str(qid)] = query_text
+            result[str(qid)] = query_text
 
         return result
 
@@ -145,15 +148,19 @@ class QulacDataset(datasets.IndexBackedDataset):
     def _load_questions_base(self, subset):
         result = {}
 
+        _splits = load_pickle(os.path.join(self.qulac_base, 'final_splits.pkl'))
+        _split = [subset]
+
         qulac = load_json(os.path.join(self.qulac_base, 'qulac.json'))
         query_ids = qulac['topic_facet_question_id']
         questions = qulac['question']
 
         for i in range(len(query_ids)):
             qid = query_ids[str(i)]
+            # if qid not in _split:
+            #     continue
             question = questions[str(i)].strip()
-            if qid not in result:
-                result[str(qid)] = question
+            result[str(qid)] = question
 
         return result
 
@@ -161,15 +168,19 @@ class QulacDataset(datasets.IndexBackedDataset):
     def _load_answers_base(self, subset):
         result = {}
 
+        _splits = load_pickle(os.path.join(self.qulac_base, 'final_splits.pkl'))
+        _split = [subset]
+
         qulac = load_json(os.path.join(self.qulac_base, 'qulac.json'))
         query_ids = qulac['topic_facet_question_id']
         answers = qulac['answer']
 
         for i in range(len(query_ids)):
             qid = query_ids[str(i)]
+            # if qid not in _split:
+            #     continue
             answer = answers[str(i)].strip()
-            if qid not in result:
-                result[str(qid)] = answer
+            result[str(qid)] = answer
 
         return result
 

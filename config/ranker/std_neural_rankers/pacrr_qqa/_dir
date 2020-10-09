@@ -1,3 +1,4 @@
+pipeline.warmup=5
 ranker=pacrr_qqa
 trainer=pairwise_qqa
 vocab=wordvec_hash_qqa
