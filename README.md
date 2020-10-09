@@ -22,7 +22,7 @@ We have now our own `ranker`, `trainer` and `vocab` classes. Check out `src`.
 
 Because of some hard coded paths we need to run our stuff from the OpenNIR folder. Like this:
 ``` 
-python ../src/start.py ../src/config/ranker/conv_knrm_qqa ../src/config/qulac
+python ../src/start.py ../src/config/ranker/std_neural_rankers/conv_knrm_qqa ../src/config/qulac
 ```
 By using the OpenNIR`util.Registry` we can put our code (new Dataset, Trainer, Ranker, etc.) in our `src` for examples.
 

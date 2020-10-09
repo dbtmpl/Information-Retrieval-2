@@ -1,8 +1,21 @@
 from onir import util, rankers, predictors, datasets
 from onir.predictors import Reranker
 from onir.rankers.conv_knrm import ConvKnrm
+from onir.rankers.pacrr import Pacrr
 
 from utils.general_utils import apply_spec_batch_qqa
+
+
+@rankers.register('pacrr_qqa')
+class PaccrQQA(Pacrr):
+
+    def input_spec(self):
+        result = super().input_spec()
+        result['fields'].update({
+            'query_tok', 'doc_tok', 'query_len', 'doc_len',
+            'question_tok', 'answer_tok', 'question_len', 'answer_len',
+        })
+        return result
 
 
 @rankers.register('conv_knrm_qqa')
@@ -10,18 +23,7 @@ class ConvKnrmQQA(ConvKnrm):
 
     @staticmethod
     def default_config():
-        result = rankers.Ranker.default_config()
-        result.update({
-            'mus': '-0.9,-0.7,-0.5,-0.3,-0.1,0.1,0.3,0.5,0.7,0.9,1.0',
-            'sigmas': '0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.001',
-            'grad_kernels': True,
-            'max_ngram': 3,
-            'crossmatch': True,
-            'conv_filters': 128,
-            'embed_dim': 300,
-            'combine_channels': False,
-            'pretrained_kernels': False,
-        })
+        result = ConvKnrm.default_config().copy()
         return result
 
     def input_spec(self):
