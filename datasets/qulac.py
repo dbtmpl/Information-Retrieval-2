@@ -128,9 +128,6 @@ class QulacDataset(datasets.IndexBackedDataset):
     def _load_queries_base(self, subset):
         result = {}
 
-        _splits = load_pickle(os.path.join(self.qulac_base, 'final_splits.pkl'))
-        _split = [subset]
-
         qulac = load_json(os.path.join(self.qulac_base, 'qulac.json'))
         query_ids = qulac['topic_facet_question_id']
         queries = qulac['topic']
@@ -148,9 +145,6 @@ class QulacDataset(datasets.IndexBackedDataset):
     def _load_questions_base(self, subset):
         result = {}
 
-        _splits = load_pickle(os.path.join(self.qulac_base, 'final_splits.pkl'))
-        _split = [subset]
-
         qulac = load_json(os.path.join(self.qulac_base, 'qulac.json'))
         query_ids = qulac['topic_facet_question_id']
         questions = qulac['question']
@@ -167,9 +161,6 @@ class QulacDataset(datasets.IndexBackedDataset):
     @memoize_method
     def _load_answers_base(self, subset):
         result = {}
-
-        _splits = load_pickle(os.path.join(self.qulac_base, 'final_splits.pkl'))
-        _split = [subset]
 
         qulac = load_json(os.path.join(self.qulac_base, 'qulac.json'))
         query_ids = qulac['topic_facet_question_id']

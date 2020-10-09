@@ -19,5 +19,4 @@ module load Miniconda3
 
 source activate InfRet2
 
-#srun python ../src/start.py ../src/config/ranker/conv_knrm_qqa ../src/config/qulac
-python ../src/start.py ../src/config/ranker/conv_knrm_qqa ../src/config/qulac
+srun ../src/start.py ../src/config/ranker/std_neural_rankers/conv_knrm_qqa ../src/config/qulac
