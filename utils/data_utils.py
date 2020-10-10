@@ -2,6 +2,7 @@ import json
 import os
 import pickle
 
+import pandas as pd
 import numpy as np
 
 
@@ -126,7 +127,41 @@ def create_dummy_qrel_file():
             f1.write(line + "\n")
 
 
+def gen_split_test_qrel(full_set_path, destination):
+    qulac = load_json('../data/qulac/qulac.json')
+    qulac_df = pd.DataFrame.from_dict(qulac)
+    qulac_df['ans_tokens'] = qulac_df.answer.apply(lambda x: x.split(' '))
+
+    neg_tokens = set(('none', 'no', 'neither','nope')) #maybe also not? 
+    pos_tokens = set(('yes',))
+    qulac_df['Ans_yes'] = qulac_df.ans_tokens.apply(lambda x: len(pos_tokens & set(x))>0) 
+    qulac_df['Ans_no'] = qulac_df.ans_tokens.apply(lambda x: (len(neg_tokens & set(x))>0) or
+                                                        (len({'not','related' } & set(x))==2)
+                                            )
+    qulac_df['Ans_idk'] = qulac_df.ans_tokens.apply(lambda x: (len({'dont','know'} & set(x))==2) or
+                                                        (len({'not','sure'} & set(x))==2)
+                                            )
+    qulac_df['Ans_other'] = ~(qulac_df.Ans_yes | qulac_df.Ans_no | qulac_df.Ans_idk)
+    qulac_df['polarity'] = qulac_df.apply(lambda x: '+' if x.Ans_yes else 
+                            ('-' if x.Ans_no else
+                            ('idk' if x.Ans_idk else 'N'
+                            )), axis=1)
+
+    yes_tfq_ids = qulac_df[qulac_df['Ans_yes'] == True].topic_facet_question_id.tolist()
+    no_tfq_ids = qulac_df[qulac_df['Ans_no'] == True].topic_facet_question_id.tolist()
+    idk_tfq_ids = qulac_df[qulac_df['Ans_idk'] == True].topic_facet_question_id.tolist()
+    other_tfq_ids = qulac_df[qulac_df['Ans_other'] == True].topic_facet_question_id.tolist()
+
+    test_set = pd.read_csv(full_set_path, delimiter= '\s+', index_col=False, header=None, names=['tfq', 'a', 'b', 'c'])
+    
+    test_set[test_set['tfq'].isin(yes_tfq_ids)].to_csv(destination+'yes_test_qrel.txt', header=None, index=None, sep=' ', mode='a')
+    test_set[test_set['tfq'].isin(no_tfq_ids)].to_csv(destination+'no_test_qrel.txt', header=None, index=None, sep=' ', mode='a')
+    test_set[test_set['tfq'].isin(idk_tfq_ids)].to_csv(destination+'idk_test_qrel.txt', header=None, index=None, sep=' ', mode='a')
+    test_set[test_set['tfq'].isin(other_tfq_ids)].to_csv(destination+'other_test_qrel.txt', header=None, index=None, sep=' ', mode='a')
+
+
 if __name__ == "__main__":
-    keep_top1000_docs_per_topic("../data/documents/webclue_docs_full", "../data/documents/webclue_docs_1000/")
+    gen_split_test_qrel('../data/qulac/full_test_qrels.txt', '../data/qulac/')
+    #keep_top1000_docs_per_topic("../data/documents/webclue_docs", "../data/documents/webclue_docs_1000/")
     # save_docs_ids_we_use()
     # split_data()
