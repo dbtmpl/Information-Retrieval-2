@@ -91,7 +91,7 @@ def __init__(self, config, logger, random):
 If config does not appear most likely the naming of the `<class_key>` (in this case `vocab`) is wrong.
 
 ### Evaluation
-run gen_split_test_qrel in data_utils.py, the destination should be ./src/data/qulac. This seperate the input file into "yes", "no", "other" and "idk" qrel files.
+run gen_split_test_qrel in data_utils.py, the destination should be ./src/data/qulac. This seperatates the input file into "yes", "no", "other" and "idk" qrel files.
 
 To evaluate based on the new qrel files, anserini and sqllite files need to be recomputed, if test has been done before, the corresponding qulac_test_* file needs to be deleted so cached results wont be displayed (see run_test.sh)
 
