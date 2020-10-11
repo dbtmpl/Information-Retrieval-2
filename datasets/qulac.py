@@ -22,6 +22,7 @@ class QulacDataset(datasets.IndexBackedDataset):
         """
 
     def __init__(self, config, logger, vocab):
+        print(config)
         super().__init__(config, logger, vocab)
         self.qulac_base = "../src/data/qulac"
         self.doc_base = "../src/data/documents/webclue_docs_1000"
@@ -134,8 +135,6 @@ class QulacDataset(datasets.IndexBackedDataset):
 
         for i in range(len(query_ids)):
             qid = query_ids[str(i)]
-            # if qid not in _split:
-            #     continue
             query_text = queries[str(i)].strip()
             result[str(qid)] = query_text
 
@@ -151,8 +150,6 @@ class QulacDataset(datasets.IndexBackedDataset):
 
         for i in range(len(query_ids)):
             qid = query_ids[str(i)]
-            # if qid not in _split:
-            #     continue
             question = questions[str(i)].strip()
             result[str(qid)] = question
 
@@ -168,8 +165,6 @@ class QulacDataset(datasets.IndexBackedDataset):
 
         for i in range(len(query_ids)):
             qid = query_ids[str(i)]
-            # if qid not in _split:
-            #     continue
             answer = answers[str(i)].strip()
             result[str(qid)] = answer
 

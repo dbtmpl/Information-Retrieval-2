@@ -6,8 +6,11 @@ data/topic_indexes/
 data/qulac/qulac_hist012_dict.json
 .idea/
 **/__pycache__/
+**/docs.zip
 **/anserini/
+**/anserini.zip
 **/anserini.porter/
+**/anserini.porter.zip
 **/anserini.porter.train.runs/
 **/anserini.porter.valid.runs/
 **/docs.sqlite

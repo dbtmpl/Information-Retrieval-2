@@ -2,6 +2,6 @@ valid_ds=qulac
 valid_ds.subset=valid
 valid_ds.ranktopk=20
 valid_ds.rankfn=bm25_k1-1.4_b-0.40
-valid_pred.measures=ndcg,ndcg@20
+valid_pred.measures=ndcg,ndcg@20,err@1,err@20
 pipeline.val_metric=ndcg@20
 valid_pred=reranker_qqa
