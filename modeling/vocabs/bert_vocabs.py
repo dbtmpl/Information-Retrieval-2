@@ -75,7 +75,8 @@ class JointBertEncoderQQA(JointBertEncoder):
     """
 
     def _concat_tokens(self, query_tok, question_tok, answer_tok):
-        return torch.cat((query_tok, question_tok, answer_tok), dim=1)
+        sep = torch.empty(len(query_tok), 1, device=query_tok.device, dtype=query_tok.dtype).fill_(self.SEP)
+        return torch.cat((query_tok, sep, question_tok, sep, answer_tok), dim=1)
 
     def enc_query_doc(self, **inputs):
         query_tok, query_len = inputs['query_tok'], inputs['query_len']
@@ -84,7 +85,7 @@ class JointBertEncoderQQA(JointBertEncoder):
         doc_tok, doc_len = inputs['doc_tok'], inputs['doc_len']
 
         query_tok_aggregated = self._concat_tokens(query_tok, question_tok, answer_tok)
-        query_len_aggregated = query_len + question_len + answer_len
+        query_len_aggregated = query_len + question_len + answer_len + 2 # two additional sep tokens
 
         BATCH, QLEN = query_tok_aggregated.shape
         maxlen = self.bert.config.max_position_embeddings
