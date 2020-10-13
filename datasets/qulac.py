@@ -22,7 +22,6 @@ class QulacDataset(datasets.IndexBackedDataset):
         """
 
     def __init__(self, config, logger, vocab):
-        print(config)
         super().__init__(config, logger, vocab)
         self.qulac_base = "../src/data/qulac"
         self.doc_base = "../src/data/documents/webclue_docs_1000"

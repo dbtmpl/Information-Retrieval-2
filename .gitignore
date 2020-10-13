@@ -13,6 +13,8 @@ data/qulac/qulac_hist012_dict.json
 **/anserini.porter.zip
 **/anserini.porter.train.runs/
 **/anserini.porter.valid.runs/
+**/anserini.porter.test.runs/
+**/anserini.porter.test_yes.runs/
 **/docs.sqlite
 **/docs.sqlite.tmp
 **/faceted_qid.qrel

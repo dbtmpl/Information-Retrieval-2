@@ -154,18 +154,19 @@ def gen_split_test_qrel(full_set_path, destination):
 
     test_set = pd.read_csv(full_set_path, delimiter='\s+', index_col=False, header=None, names=['tfq', 'a', 'b', 'c'])
 
-    test_set[test_set['tfq'].isin(yes_tfq_ids)].to_csv(destination + 'yes_test_qrel.txt', header=None, index=None,
+    test_set[test_set['tfq'].isin(yes_tfq_ids)].to_csv(destination + 'yes_test.qrel.txt', header=None, index=None,
                                                        sep=' ', mode='a')
-    test_set[test_set['tfq'].isin(no_tfq_ids)].to_csv(destination + 'no_test_qrel.txt', header=None, index=None,
+    test_set[test_set['tfq'].isin(no_tfq_ids)].to_csv(destination + 'no_test.qrel.txt', header=None, index=None,
                                                       sep=' ', mode='a')
-    test_set[test_set['tfq'].isin(idk_tfq_ids)].to_csv(destination + 'idk_test_qrel.txt', header=None, index=None,
+    test_set[test_set['tfq'].isin(idk_tfq_ids)].to_csv(destination + 'idk_test.qrel.txt', header=None, index=None,
                                                        sep=' ', mode='a')
-    test_set[test_set['tfq'].isin(other_tfq_ids)].to_csv(destination + 'other_test_qrel.txt', header=None, index=None,
+    test_set[test_set['tfq'].isin(other_tfq_ids)].to_csv(destination + 'other_test.qrel.txt', header=None, index=None,
                                                          sep=' ', mode='a')
 
 
 if __name__ == "__main__":
-    gen_split_test_qrel('../data/qulac/full_test_qrels.txt', '../data/qulac/')
+    gen_split_test_qrel('../data/qulac/test.qrels.txt', '../data/qulac/')
     # keep_top1000_docs_per_topic("../data/documents/webclue_docs", "../data/documents/webclue_docs_1000/")
     # save_docs_ids_we_use()
     # split_data()
+

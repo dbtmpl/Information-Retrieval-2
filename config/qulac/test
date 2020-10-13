@@ -1,6 +1,6 @@
 test_ds=qulac
-test_ds.subset=test
-test_ds.rankfn=bm25_k1-1.4_b-0.40
+test_ds.subset=yes_test
+test_pred.rankfn=bm25
 test_ds.ranktopk=50
 test_pred=reranker_qqa
-test_pred.measures=ndcg,ndcg@20,err@1,err@20
+test_pred.measures=ndcg,ndcg@1,ndcg@20,err@1,err@20

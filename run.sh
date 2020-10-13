@@ -19,6 +19,10 @@ module load CUDA/10.0.130
 
 source activate InfRet2
 
-srun python ../src/start.py ../src/config/ranker/std_neural_rankers/conv_knrm_qqa ../src/config/qulac
+srun python ../src/start.py config/conv_knrm ../src/config/qulac
+#srun python ../src/start.py ../src/config/ranker/std_neural_rankers/pacrr_qqa_single_q ../src/config/qulac
+#srun python ../src/start.py ../src/config/ranker/std_neural_rankers/pacrr_qqacd_mean_aggr ../src/config/qulac
+#srun python ../src/start.py ../src/config/ranker/std_neural_rankers/conv_knrm_qqa ../src/config/qulac
 #srun python ../src/start.py ../src/config/ranker/std_neural_rankers/conv_knrm_qqa_mean_aggr ../src/config/qulac
 #srun python ../src/start.py ../src/config/ranker/std_neural_rankers/pacrr_qqa ../src/config/qulac
+

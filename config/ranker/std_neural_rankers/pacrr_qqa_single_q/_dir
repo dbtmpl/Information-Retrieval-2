@@ -1,0 +1,2 @@
+pipeline.warmup=5
+ranker=pacrr
