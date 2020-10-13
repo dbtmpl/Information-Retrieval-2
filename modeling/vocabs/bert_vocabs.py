@@ -1,4 +1,6 @@
 import torch
+import torch.nn as nn
+from torch.nn import functional as F
 
 from onir.vocab import BertVocab
 from onir.vocab.bert_vocab import SepBertEncoder, JointBertEncoder
@@ -33,7 +35,29 @@ class SepBertEncoderQQA(SepBertEncoder):
 
     def __init__(self, vocabulary):
         super().__init__(vocabulary)
-        self.aggregation_func = get_aggregation_func(vocabulary.enc_aggregation)
+
+        conv_channels = [8, 16]
+        self.qqa_convs = []
+        cur_channels = 1
+        for k, conv_dim in enumerate(conv_channels):
+            conv = nn.Conv1d(
+                cur_channels,
+                conv_dim,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+            )
+            self.add_module("qqa_embed{}".format(k + 1), conv)
+            self.qqa_convs.append(conv)
+            cur_channels = conv_dim
+
+        self.qq_down = nn.Conv1d(
+            conv_channels[-1],
+            conv_channels[-1],
+            kernel_size=3,
+            stride=3,
+            padding=0,
+        )
 
     def _enc_spec(self) -> dict:
         result = super()._enc_spec()
@@ -51,9 +75,9 @@ class SepBertEncoderQQA(SepBertEncoder):
             query_results, query_cls = self._forward(inputs['query_tok'], inputs['query_len'], seg_id=0)
             question_results, question_cls = self._forward(inputs['question_tok'], inputs['question_len'], seg_id=0)
             answer_results, answer_cls = self._forward(inputs['answer_tok'], inputs['answer_len'], seg_id=0)
-            aggregated_cls = self._aggregate_cls_embeddings(query_cls, question_cls, answer_cls)
+            qqa_embed = self._aggregate_cls_embeddings(query_cls[-1], question_cls[-1], answer_cls[-1])
             result.update({
-                'qqa_cls': aggregated_cls
+                'qqa_cls': qqa_embed
             })
 
         if 'doc_tok' in inputs and 'doc_len' in inputs:
@@ -65,8 +89,12 @@ class SepBertEncoderQQA(SepBertEncoder):
         return result
 
     def _aggregate_cls_embeddings(self, query_cls, question_cls, answer_cls):
-        aggregation = self.aggregation_func(query_cls[-1], question_cls[-1], answer_cls[-1], dim=1)
-        return aggregation
+        qqa_embed = torch.cat((query_cls, question_cls, answer_cls), dim=1)[:, None, :]
+
+        for layer in self.qqa_convs:
+            qqa_embed = F.relu(layer(qqa_embed))
+
+        return self.qq_down(qqa_embed)
 
 
 class JointBertEncoderQQA(JointBertEncoder):
@@ -85,7 +113,7 @@ class JointBertEncoderQQA(JointBertEncoder):
         doc_tok, doc_len = inputs['doc_tok'], inputs['doc_len']
 
         query_tok_aggregated = self._concat_tokens(query_tok, question_tok, answer_tok)
-        query_len_aggregated = query_len + question_len + answer_len + 2 # two additional sep tokens
+        query_len_aggregated = query_len + question_len + answer_len + 2  # two additional sep tokens
 
         BATCH, QLEN = query_tok_aggregated.shape
         maxlen = self.bert.config.max_position_embeddings
