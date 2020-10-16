@@ -73,10 +73,17 @@ class SepBertEncoderQQA(SepBertEncoder):
         result = {}
         if 'query_tok' in inputs and 'question_tok' in inputs and 'answer_tok' in inputs:
             query_results, query_cls = self._forward(inputs['query_tok'], inputs['query_len'], seg_id=0)
-            if inputs['question_len'] > 0 and inputs['answer_len'] > 0:
+
+            if len(inputs['question_len']) > 1 and len(inputs['answer_len']) > 1:
                 question_results, question_cls = self._forward(inputs['question_tok'], inputs['question_len'], seg_id=0)
                 answer_results, answer_cls = self._forward(inputs['answer_tok'], inputs['answer_len'], seg_id=0)
                 qqa_embed = self._aggregate_cls_embeddings(query_cls[-1], question_cls[-1], answer_cls[-1])
+
+            elif inputs['question_len'] > 0 and inputs['answer_len'] > 0:
+                question_results, question_cls = self._forward(inputs['question_tok'], inputs['question_len'], seg_id=0)
+                answer_results, answer_cls = self._forward(inputs['answer_tok'], inputs['answer_len'], seg_id=0)
+                qqa_embed = self._aggregate_cls_embeddings(query_cls[-1], question_cls[-1], answer_cls[-1])
+
             else:
                 qqa_embed = self._aggregate_cls_embeddings(query_cls[-1])
             result.update({
