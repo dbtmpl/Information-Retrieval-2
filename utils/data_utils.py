@@ -165,8 +165,8 @@ def gen_split_test_qrel(full_set_path, destination):
 
 
 if __name__ == "__main__":
-    gen_split_test_qrel('../data/qulac/test.qrels.txt', '../data/qulac/')
-    # keep_top1000_docs_per_topic("../data/documents/webclue_docs", "../data/documents/webclue_docs_1000/")
+    keep_top1000_docs_per_topic("../data/documents/webclue_docs", "../data/documents/webclue_docs_1000/")
+    # gen_split_test_qrel('../data/qulac/test.qrels.txt', '../data/qulac/')
     # save_docs_ids_we_use()
     # split_data()
 
