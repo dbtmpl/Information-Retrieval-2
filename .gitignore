@@ -19,5 +19,4 @@ data/qulac/qulac_hist012_dict.json
 **/docs.sqlite.tmp
 **/faceted_qid.qrel
 **/qids_splits_topic.pkl
-**/initial_retrieval_dict_10K.pkl
 **/used_docs.pkl
