@@ -1,5 +1,5 @@
 test_ds=qulac
-test_ds.subset=yes_test
+test_ds.subset=test
 test_pred.rankfn=bm25
 test_ds.ranktopk=50
 test_pred=reranker_qqa
